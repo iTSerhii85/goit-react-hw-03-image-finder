@@ -1,9 +1,9 @@
 import { Component } from "react";
+import { ImSearch } from "react-icons/im";
 import {  toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { Label, Searchbar, SearchForm, SearchFormButton, SearchFormInput } from "./SearchBar.style";
-import { ImSearch } from "react-icons/im";
 
 export class SearchBar extends Component {
   state = {
@@ -16,14 +16,10 @@ export class SearchBar extends Component {
 
   handleSubmit = (evt) => {
     evt.preventDefault();
-
     if (this.state.inputValue.trim() === "") {
-      // toast("Wow so easy !");
-
       toast.info('enter something!!!')
       return;
     };
-
     this.props.onSearch(this.state.inputValue);
     this.setState ({ inputValue: '' });
   }
