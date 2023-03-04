@@ -7,7 +7,7 @@ import { Loader } from "./Loader/Loader";
 import { Modal } from "./Modal/Modal";
 import { SearchBar } from "./Searchbar/Searchbar";
 import { Layout } from "./Layout";
-import { ImageGalleryItem } from "./ImageGallery/ImageGalleryItem";
+// import { ImageGalleryItem } from "./ImageGallery/ImageGalleryItem";
 
 export class App extends Component {
   state = {
@@ -24,9 +24,7 @@ export class App extends Component {
       <Layout>
         <GlobalStyle/>
         <SearchBar onSearch={this.handleFormSubmit}/>
-        <ImageGallery>
-          <ImageGalleryItem searchValue={this.state.searchValue} />
-        </ImageGallery>
+        <ImageGallery searchValue={this.state.searchValue}/>
         {this.state.loading && <Loader/>}
         <LoadMoreButton/>
         <Modal></Modal>
