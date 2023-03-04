@@ -1,3 +1,6 @@
+import {  toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 import { Loader } from "components/Loader/Loader";
 import { LoadMoreButton } from "components/LoadMoreButton/LoadMoreButton";
@@ -11,13 +14,13 @@ export class ImageGallery extends Component {
   state = {
     pictures: null,
     error: null,
-    page: 3,
+    page: null,
     status: 'idle'
   };
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.searchValue !== this.props.searchValue) {
-      this.setState({pictures: null, status: 'pending'});
+      this.setState({ status: 'pending', page: 1});
 
       setTimeout(() => {
         fetchPictures(this.props.searchValue, this.state.page)
@@ -25,7 +28,7 @@ export class ImageGallery extends Component {
           if (obj.data.hits.length !== 0) {
             this.setState({ pictures: obj.data.hits, status: 'resolved' });
           } else {
-            alert('There are no images for this request, please try another one!!!');
+            toast.info('There are no images for this request, please try another one!!!');
             this.setState({status: 'idle'});
             return;
           }
@@ -35,11 +38,24 @@ export class ImageGallery extends Component {
     }
   };
 
+  LoadMore=()=>{
+    fetchPictures(this.props.searchValue, this.state.page +1)
+    .then(obj =>{
+      if (obj.data.hits.length !== 0) {
+        this.setState(prevState => {return {pictures: [...prevState.pictures, ...obj.data.hits]}});
+      } else {
+        toast.info('There are no more images for this request, please try another one!!!');
+        return;
+      }})
+    .then(this.setState({page: this.state.page + 1}))
+    .catch(error => this.setState({error, status: 'rejected'}));
+  }
+
   render() {
     const {status, pictures, error} = this.state;
     if (status === 'idle') {
       return (
-        <h1>Enter the name of the picture</h1>
+          <h1>Enter the name of the picture</h1>
       );
     }
 
@@ -64,7 +80,7 @@ export class ImageGallery extends Component {
           <ImageGalleryList>
             <ImageGalleryItem pictures={pictures} />
           </ImageGalleryList>
-          <LoadMoreButton />
+          <LoadMoreButton onLoadMore={this.LoadMore} />
         </>
       );
     }
