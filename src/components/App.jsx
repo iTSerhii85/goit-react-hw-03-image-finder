@@ -6,20 +6,26 @@ import { Component } from "react";
 import { GlobalStyle } from "./GlobalStyle";
 
 import { ImageGallery } from "./ImageGallery/ImageGallery";
-import { Modal } from "./Modal/Modal";
+// import { Modal } from "./Modal/Modal";
 import { SearchBar } from "./Searchbar/Searchbar";
 import { Layout } from "./Layout";
 
 export class App extends Component {
   state = {
-    searchValue: ''
+    searchValue: '',
+    // showModal: false
   };
 
   handleFormSubmit=(searchText)=>{
     this.setState({ searchValue: searchText })
   };
 
+  // handleShowModal=()=>{
+  //   this.setState({showModal: true})
+  // }
+
   render() {
+    // const {searchValue, showModal} = this.state;
     const {searchValue} = this.state;
 
     return (
@@ -38,8 +44,11 @@ export class App extends Component {
           theme="dark"
         />
         <SearchBar onSearch={this.handleFormSubmit}/>
-        <ImageGallery searchValue={searchValue}/>
-        <Modal></Modal>
+        <ImageGallery
+          searchValue={searchValue}
+          // showModal={this.handleShowModal}
+        />
+        {/* {showModal && <Modal></Modal>} */}
       </Layout>
     );
   }

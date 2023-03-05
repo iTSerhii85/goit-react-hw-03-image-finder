@@ -9,18 +9,21 @@ import { fetchPictures } from "./fetchPictures";
 
 import { ImageGalleryList } from "./ImageGallery.style";
 import { ImageGalleryItem } from "./ImageGalleryItem";
+import { NextLoader } from 'components/Loader/NextLoader';
+import { Modal } from 'components/Modal/Modal';
 
 export class ImageGallery extends Component {
   state = {
     pictures: null,
     error: null,
     page: null,
+    showModal: null,
     status: 'idle'
   };
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.searchValue !== this.props.searchValue) {
-      this.setState({ status: 'pending', page: 1});
+      this.setState({ status: 'pending', page: 1, pictures: null});
 
       setTimeout(() => {
         fetchPictures(this.props.searchValue, this.state.page)
@@ -34,25 +37,37 @@ export class ImageGallery extends Component {
           }
         })
         .catch(error => this.setState({error, status: 'rejected'}))
-      }, 2000)
+      }, 500)
     }
   };
 
   LoadMore=()=>{
-    fetchPictures(this.props.searchValue, this.state.page +1)
-    .then(obj =>{
-      if (obj.data.hits.length !== 0) {
-        this.setState(prevState => {return {pictures: [...prevState.pictures, ...obj.data.hits]}});
-      } else {
-        toast.info('There are no more images for this request, please try another one!!!');
-        return;
-      }})
-    .then(this.setState({page: this.state.page + 1}))
-    .catch(error => this.setState({error, status: 'rejected'}));
+    this.setState({ status: 'pending' });
+    setTimeout(() => {
+      fetchPictures(this.props.searchValue, this.state.page +1)
+      .then(obj =>{
+        if (obj.data.hits.length !== 0) {
+          this.setState(prevState => {return {pictures: [...prevState.pictures, ...obj.data.hits]}});
+        } else {
+          toast.info('There are no more images for this request, please try another one!!!');
+          return;
+        }})
+      .then(this.setState({ status: 'resolved' }))
+      .then(this.setState({page: this.state.page + 1}))
+      .catch(error => this.setState({error, status: 'rejected'}));
+    }, 500)
+  }
+
+  handleShowModal=(largeImageURL)=>{
+    this.setState({showModal: largeImageURL})
+  }
+
+  handleCloseModal=()=>{
+    this.setState({showModal: false})
   }
 
   render() {
-    const {status, pictures, error} = this.state;
+    const {status, pictures, error, showModal} = this.state;
     if (status === 'idle') {
       return (
           <h1>Enter the name of the picture</h1>
@@ -61,7 +76,19 @@ export class ImageGallery extends Component {
 
     if (status === 'pending') {
       return (
-        <Loader/>
+        <>
+          {this.state.pictures && 
+            <>
+              <ImageGalleryList>
+                <ImageGalleryItem
+                  pictures={pictures}
+                  showModal={this.handleShowModal}
+                />
+              </ImageGalleryList>
+              <NextLoader/>
+            </>}
+          <Loader/>
+        </>
       );
     }
 
@@ -78,9 +105,16 @@ export class ImageGallery extends Component {
       return (
         <>
           <ImageGalleryList>
-            <ImageGalleryItem pictures={pictures} />
+            <ImageGalleryItem
+              pictures={pictures}
+              showModal={this.handleShowModal}
+            />
           </ImageGalleryList>
           <LoadMoreButton onLoadMore={this.LoadMore} />
+          {showModal && <Modal
+            imgUrl={showModal}
+            CloseModal={this.handleCloseModal}
+          />}
         </>
       );
     }
