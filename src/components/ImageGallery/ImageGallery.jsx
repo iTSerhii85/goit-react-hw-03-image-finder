@@ -17,19 +17,19 @@ export class ImageGallery extends Component {
     pictures: null,
     error: null,
     page: null,
+    totalHits: null,
     showModal: null,
     status: 'idle'
   };
 
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.searchValue !== this.props.searchValue) {
-      this.setState({ status: 'pending', page: 1, pictures: null});
+      this.setState({ status: 'pending', page: 1, pictures: null });
 
-      setTimeout(() => {
-        fetchPictures(this.props.searchValue, this.state.page)
+        fetchPictures(this.props.searchValue, 1)
         .then(obj =>{
           if (obj.data.hits.length !== 0) {
-            this.setState({ pictures: obj.data.hits, status: 'resolved' });
+            this.setState({ pictures: obj.data.hits, status: 'resolved', totalHits: obj.data.totalHits });
           } else {
             toast.info('There are no images for this request, please try another one!!!');
             this.setState({status: 'idle'});
@@ -37,25 +37,20 @@ export class ImageGallery extends Component {
           }
         })
         .catch(error => this.setState({error, status: 'rejected'}))
-      }, 500)
     }
   };
 
   LoadMore=()=>{
     this.setState({ status: 'pending' });
-    setTimeout(() => {
+ 
       fetchPictures(this.props.searchValue, this.state.page +1)
       .then(obj =>{
         if (obj.data.hits.length !== 0) {
           this.setState(prevState => {return {pictures: [...prevState.pictures, ...obj.data.hits]}});
-        } else {
-          toast.info('There are no more images for this request, please try another one!!!');
-          return;
         }})
       .then(this.setState({ status: 'resolved' }))
       .then(this.setState({page: this.state.page + 1}))
       .catch(error => this.setState({error, status: 'rejected'}));
-    }, 500)
   }
 
   handleShowModal=(largeImageURL)=>{
@@ -63,7 +58,7 @@ export class ImageGallery extends Component {
   }
 
   handleCloseModal=()=>{
-    this.setState({showModal: false})
+    this.setState({showModal: null})
   }
 
   render() {
@@ -111,7 +106,9 @@ export class ImageGallery extends Component {
               showModal={this.handleShowModal}
             />
           </ImageGalleryList>
-          <LoadMoreButton onLoadMore={this.LoadMore} />
+
+          {this.state.pictures.length < this.state.totalHits && <LoadMoreButton onLoadMore={this.LoadMore} />}
+
           {showModal && <Modal
             imgUrl={showModal}
             CloseModal={this.handleCloseModal}
