@@ -86,8 +86,9 @@ export class ImageGallery extends Component {
                 />
               </ImageGalleryList>
               <NextLoader/>
-            </>}
-          <Loader/>
+            </>
+          }
+          {!this.state.pictures && <Loader/>}
         </>
       );
     }
