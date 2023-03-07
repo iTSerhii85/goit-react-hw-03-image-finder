@@ -1,7 +1,6 @@
 import {  toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
 import { Loader } from "components/Loader/Loader";
 import { LoadMoreButton } from "components/LoadMoreButton/LoadMoreButton";
 import { Component } from "react";
